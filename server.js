@@ -7,6 +7,7 @@ const helmet = require('helmet');
 
 const path = require('path');
 const fs = require('fs');
+const crypto = require('node:crypto');
 const app = express();
 const dbFile = path.resolve(process.env.DB_PATH || './data/nexora.db');
 fs.mkdirSync(path.dirname(dbFile), {recursive:true});
@@ -26,7 +27,9 @@ db.exec('CREATE TABLE IF NOT EXISTS sessions (sid TEXT PRIMARY KEY, data TEXT NO
 app.disable('x-powered-by');
 app.use(helmet({contentSecurityPolicy:{directives:{defaultSrc:["'self'"],imgSrc:["'self'",'data:','https://images.unsplash.com'],styleSrc:["'self'","'unsafe-inline'",'https://fonts.googleapis.com'],fontSrc:["'self'",'https://fonts.gstatic.com'],scriptSrc:["'self'"],connectSrc:["'self'"]}}}));
 app.use(express.json({limit:'30kb'}));
-app.use(session({store:new SqliteSessionStore(db),secret:process.env.SESSION_SECRET||'development-only-change-this-secret',resave:false,saveUninitialized:false,cookie:{httpOnly:true,sameSite:'lax',secure:process.env.NODE_ENV==='production',maxAge:7*24*60*60*1000}}));
+const sessionSecret=process.env.SESSION_SECRET||crypto.randomBytes(32).toString('hex');
+if(!process.env.SESSION_SECRET)console.warn('SESSION_SECRET is not set; using a temporary secret. Set SESSION_SECRET to keep sessions valid across restarts.');
+app.use(session({store:new SqliteSessionStore(db),secret:sessionSecret,resave:false,saveUninitialized:false,cookie:{httpOnly:true,sameSite:'lax',secure:process.env.NODE_ENV==='production',maxAge:7*24*60*60*1000}}));
 app.use(express.static(path.join(__dirname,'public')));
 const auth=(req,res,next)=>req.session.userId?next():res.status(401).json({error:'Please sign in to continue.'});
 const validEmail=s=>typeof s==='string'&&/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s);
@@ -85,9 +88,9 @@ app.post('/api/checkout',auth,(req,res)=>{
 app.post('/api/newsletter',(req,res)=>{const email=req.body?.email;if(!validEmail(email))return res.status(400).json({error:'Enter a valid email address.'});res.json({ok:true,message:'You’re on the list. Look out for a note from us soon.'});});
 app.get('*',(req,res)=>res.sendFile(path.join(__dirname,'public','index.html')));
 app.use((err,req,res,next)=>{console.error(err.message);res.status(500).json({error:'Something went wrong. Please try again.'});});
-if(process.env.NODE_ENV==='production'&&!process.env.SESSION_SECRET)throw new Error('SESSION_SECRET must be set in production.');if(process.env.NODE_ENV==='production')app.set('trust proxy',1);
+if(process.env.NODE_ENV==='production')app.set('trust proxy',1);
 if(require.main===module){
-  const port=Number(process.env.PORT)||3000;
+  const port=Number(process.env.PORT||3000);
   const start=(candidate,isFallback=false)=>{
     const server=app.listen(candidate,'0.0.0.0',()=>{
       if(isFallback)console.warn(`Port 3000 is unavailable; using port ${candidate}. Set PORT to choose a different port.`);

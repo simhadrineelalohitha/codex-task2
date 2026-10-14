@@ -3,7 +3,11 @@
   "version": "1.0.0",
   "description": "Premium full-stack NEXORA ecommerce store",
   "main": "server.js",
+  "engines": {
+    "node": ">=22.13.0"
+  },
   "scripts": {
+    "build": "node --check server.js && node --check db/init.js && node --check public/js/app.js",
     "start": "node server.js",
     "dev": "node --watch server.js",
     "init-db": "node db/init.js",

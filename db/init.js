@@ -1,7 +1,9 @@
 const {DatabaseSync}=require('node:sqlite');
 const path = require('path');
+const fs = require('fs');
 require('dotenv').config();
-const file = process.env.DB_PATH || './data/nexora.db';
+const file = path.resolve(process.env.DB_PATH || './data/nexora.db');
+fs.mkdirSync(path.dirname(file), {recursive:true});
 const db = new DatabaseSync(path.resolve(file));
 db.exec('PRAGMA foreign_keys=ON;');
 db.exec('PRAGMA journal_mode=WAL;')
