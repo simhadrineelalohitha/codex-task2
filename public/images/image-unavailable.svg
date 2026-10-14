@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 900" role="img" aria-label="Product image unavailable">
+  <defs>
+    <linearGradient id="paper" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#eeeae1"/><stop offset="1" stop-color="#d9d5ca"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="900" fill="url(#paper)"/>
+  <circle cx="400" cy="390" r="112" fill="#414b3d" opacity=".08"/>
+  <path d="M330 350h140v145H330z" fill="none" stroke="#414b3d" stroke-width="10" opacity=".45"/>
+  <circle cx="375" cy="395" r="13" fill="#bf7557" opacity=".7"/>
+  <path d="m340 475 42-45 29 28 25-23 34 40" fill="none" stroke="#414b3d" stroke-width="9" opacity=".45"/>
+  <text x="400" y="565" text-anchor="middle" fill="#414b3d" font-family="Arial,sans-serif" font-size="22" letter-spacing="5" opacity=".65">NEXORA</text>
+</svg>
